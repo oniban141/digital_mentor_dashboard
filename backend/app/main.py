@@ -4,6 +4,10 @@ from app.api import dashboard_data, crm_integration
 
 app = FastAPI()
 
+@app.get("/")
+async def root():
+    return {"message": "Welcome to Digital Mentor Dashboard API"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

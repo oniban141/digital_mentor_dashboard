@@ -1,32 +1,29 @@
 from datetime import datetime, timedelta
 from app.services.crm_service import get_pensioners_from_crm
 
-# Кеш в памяти
-_cached_metrics = None
-_cached_history = None
-
 def get_current_metrics():
-    """Получение текущей метрики."""
-    global _cached_metrics
-    pensioners = get_pensioners_from_crm()
-    _cached_metrics = {
+    pensioners = get_pensioners_from_crm(days=30)
+    return {
         "current_count": len(pensioners),
         "last_updated": datetime.now().isoformat(),
         "status": "active"
     }
-    return _cached_metrics
 
 def get_history_data(period: str = "7d"):
-    """Получение исторических данных для графика."""
-    global _cached_history
-    pensioners = get_pensioners_from_crm()
+    days = int(period[:-1])
+    pensioners = get_pensioners_from_crm(days=days)
+    total_pensioners = len(pensioners)
 
-    # Пример: генерация тестовых данных
     history = []
     today = datetime.now()
-    for i in range(7):
+    for i in range(days):
         date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
-        history.append({"date": date, "count": len(pensioners) - i * 10})
+        # Распределяем пенсионеров равномерно по дням
+        count = total_pensioners // days
+        if i < total_pensioners % days:
+            count += 1
+        history.append({"date": date, "count": count})
 
-    _cached_history = {"period": period, "data": history}
-    return _cached_history
+    # Сортируем данные по дате
+    history.sort(key=lambda x: x["date"])
+    return {"period": period, "data": history}

@@ -2,11 +2,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function updateMetrics() {
         try {
             const metrics = await fetchMetrics();
+            console.log("Metrics:", metrics);
             document.getElementById("current-count").textContent = metrics.current_count;
             document.getElementById("last-updated").textContent = new Date(metrics.last_updated).toLocaleString();
             document.getElementById("connection-status").textContent = metrics.status === "active" ? "Активно" : "Ошибка";
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching metrics:", error);
             document.getElementById("connection-status").textContent = "Ошибка";
         }
     }
@@ -14,9 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function updateChart(period = "7d") {
         try {
             const history = await fetchHistory(period);
+            console.log("History:", history);
             renderGrowthChart(history.data);
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching history:", error);
         }
     }
 
