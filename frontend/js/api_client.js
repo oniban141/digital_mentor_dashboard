@@ -1,13 +1,21 @@
 const API_BASE_URL = "http://localhost:8000/api/dashboard";
 
 async function fetchMetrics() {
-    const response = await fetch(`${API_BASE_URL}/metrics`);
-    if (!response.ok) throw new Error("Ошибка загрузки метрик");
-    return await response.json();
+    try {
+        const response = await axios.get(`${API_BASE_URL}/metrics`, { timeout: 10000 });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching metrics:", error);
+        throw error;
+    }
 }
 
 async function fetchHistory(period = "7d") {
-    const response = await fetch(`${API_BASE_URL}/history?period=${period}`);
-    if (!response.ok) throw new Error("Ошибка загрузки истории");
-    return await response.json();
+    try {
+        const response = await axios.get(`${API_BASE_URL}/history?period=${period}`, { timeout: 10000 });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching history:", error);
+        throw error;
+    }
 }

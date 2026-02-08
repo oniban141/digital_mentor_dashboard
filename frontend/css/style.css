@@ -50,3 +50,8 @@ button:hover {
     background: #f8f9fa;
     border-radius: 5px;
 }
+
+.loading {
+    color: #6c757d;
+    font-style: italic;
+}

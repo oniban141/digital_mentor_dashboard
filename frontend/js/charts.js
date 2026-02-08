@@ -15,7 +15,8 @@ function renderGrowthChart(data) {
                 label: "Количество пенсионеров",
                 data: counts,
                 borderColor: "rgb(75, 192, 192)",
-                tension: 0.1
+                tension: 0.1,
+                fill: false
             }]
         },
         options: {
@@ -24,6 +25,11 @@ function renderGrowthChart(data) {
                 tooltip: {
                     mode: "index",
                     intersect: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
                 }
             }
         }

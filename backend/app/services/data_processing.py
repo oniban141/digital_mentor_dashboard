@@ -1,32 +1,45 @@
 from datetime import datetime, timedelta
 from app.services.crm_service import get_pensioners_from_crm
+from fastapi import HTTPException
+from functools import lru_cache
+import logging
 
-# Кеш в памяти
-_cached_metrics = None
-_cached_history = None
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
+@lru_cache(maxsize=1)
 def get_current_metrics():
-    """Получение текущей метрики."""
-    global _cached_metrics
-    pensioners = get_pensioners_from_crm()
-    _cached_metrics = {
-        "current_count": len(pensioners),
-        "last_updated": datetime.now().isoformat(),
-        "status": "active"
-    }
-    return _cached_metrics
+    try:
+        logger.info("Fetching current metrics...")
+        pensioners = get_pensioners_from_crm(days=30)
+        return {
+            "current_count": len(pensioners),
+            "last_updated": datetime.now().isoformat(),
+            "status": "active"
+        }
+    except Exception as e:
+        logger.error(f"Error fetching metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
+@lru_cache(maxsize=1)
 def get_history_data(period: str = "7d"):
-    """Получение исторических данных для графика."""
-    global _cached_history
-    pensioners = get_pensioners_from_crm()
+    try:
+        logger.info(f"Fetching history data for period {period}...")
+        days = int(period[:-1])
+        pensioners = get_pensioners_from_crm(days=days)
+        total_pensioners = len(pensioners)
 
-    # Пример: генерация тестовых данных
-    history = []
-    today = datetime.now()
-    for i in range(7):
-        date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
-        history.append({"date": date, "count": len(pensioners) - i * 10})
+        history = []
+        today = datetime.now()
+        for i in range(days):
+            date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+            count = total_pensioners // days
+            if i < total_pensioners % days:
+                count += 1
+            history.append({"date": date, "count": count})
 
-    _cached_history = {"period": period, "data": history}
-    return _cached_history
+        history.sort(key=lambda x: x["date"])
+        return {"period": period, "data": history}
+    except Exception as e:
+        logger.error(f"Error fetching history data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
