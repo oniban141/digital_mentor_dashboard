@@ -1,45 +1,65 @@
 from datetime import datetime, timedelta
-from app.services.crm_service import get_pensioners_from_crm
-from fastapi import HTTPException
-from functools import lru_cache
+from .crm_service import fetch_all_users, fetch_all_managers
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@lru_cache(maxsize=1)
 def get_current_metrics():
     try:
-        logger.info("Fetching current metrics...")
-        pensioners = get_pensioners_from_crm(days=30)
+        pensioners = fetch_all_users()
+        volunteers = fetch_all_managers()
+
+        logger.info(f"Текущее количество пенсионеров: {len(pensioners)}")
+        logger.info(f"Текущее количество волонтеров: {len(volunteers)}")
         return {
-            "current_count": len(pensioners),
+            "pensioners_count": len(pensioners),
+            "volunteers_count": len(volunteers),
             "last_updated": datetime.now().isoformat(),
             "status": "active"
         }
     except Exception as e:
-        logger.error(f"Error fetching metrics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Ошибка в get_current_metrics: {e}")
+        return {
+            "pensioners_count": 0,
+            "volunteers_count": 0,
+            "last_updated": datetime.now().isoformat(),
+            "status": f"error: {str(e)}"
+        }
 
-@lru_cache(maxsize=1)
-def get_history_data(period: str = "7d"):
+def get_history_data(period: str = "30d"):
     try:
-        logger.info(f"Fetching history data for period {period}...")
-        days = int(period[:-1])
-        pensioners = get_pensioners_from_crm(days=days)
-        total_pensioners = len(pensioners)
+        pensioners = fetch_all_users()
+        volunteers = fetch_all_managers()
 
-        history = []
+        if period == "all":
+            days = 365
+        else:
+            days = int(period[:-1])
+
+        pensioners_history = []
+        volunteers_history = []
         today = datetime.now()
+
         for i in range(days):
             date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
-            count = total_pensioners // days
-            if i < total_pensioners % days:
-                count += 1
-            history.append({"date": date, "count": count})
+            pensioners_count = len(pensioners) // days * (i + 1) if days > 0 else len(pensioners)
+            volunteers_count = len(volunteers) // days * (i + 1) if days > 0 else len(volunteers)
+            pensioners_history.append({"date": date, "count": pensioners_count})
+            volunteers_history.append({"date": date, "count": volunteers_count})
 
-        history.sort(key=lambda x: x["date"])
-        return {"period": period, "data": history}
+        pensioners_history.sort(key=lambda x: x["date"])
+        volunteers_history.sort(key=lambda x: x["date"])
+
+        return {
+            "period": period,
+            "pensioners": pensioners_history,
+            "volunteers": volunteers_history
+        }
     except Exception as e:
-        logger.error(f"Error fetching history data: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Ошибка в get_history_data: {e}")
+        return {
+            "period": period,
+            "pensioners": [],
+            "volunteers": [],
+            "error": str(e)
+        }

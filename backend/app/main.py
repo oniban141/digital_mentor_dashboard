@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import dashboard_data, crm_integration
+from fastapi.responses import JSONResponse
+from app.api import dashboard_data
 import logging
 
 app = FastAPI()
@@ -14,7 +15,6 @@ app.add_middleware(
 )
 
 app.include_router(dashboard_data.router, prefix="/api/dashboard")
-app.include_router(crm_integration.router, prefix="/api/crm")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -26,3 +26,11 @@ async def startup_event():
 @app.get("/")
 async def root():
     return {"message": "Welcome to Digital Mentor Dashboard API"}
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unexpected error: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"Internal server error: {str(exc)}"},
+    )

@@ -3,28 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дашборд "Цифровой наставник"</title>
+    <title>Дашборд пользователей CRM</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="dashboard">
-        <h1>Дашборд "Цифровой наставник"</h1>
+        <h1>Дашборд пользователей CRM</h1>
 
         <div class="widget">
-            <h2>Текущее количество пенсионеров</h2>
-            <div id="current-count">Загрузка...</div>
+            <h2>Текущее количество пользователей</h2>
+            <div>
+                <p>Пенсионеры: <span id="pensioners-count">Загрузка...</span></p>
+                <p>Волонтеры: <span id="volunteers-count">Загрузка...</span></p>
+            </div>
             <button id="refresh-btn">Обновить</button>
         </div>
 
         <div class="widget">
-            <h2>Динамика роста</h2>
-            <canvas id="growth-chart"></canvas>
+            <h2>Динамика изменения количества пользователей</h2>
             <div class="period-selector">
                 <button data-period="7d">7 дней</button>
                 <button data-period="30d">30 дней</button>
+                <button data-period="90d">90 дней</button>
+                <button data-period="all">За все время</button>
             </div>
+            <canvas id="history-chart"></canvas>
         </div>
 
         <div class="data-status">
@@ -35,7 +40,6 @@
     </div>
 
     <script src="js/api_client.js"></script>
-    <script src="js/charts.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
