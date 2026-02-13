@@ -28,15 +28,6 @@ docker run -p 8000:8000 dashboard-backend
 config_utils.py
 Хранит конфигурационные данные для подключения к API.
 
-
-  
-    
-      Константа
-      Описание
-    
-  
-  
-    
       API_KEY
       Ключ API для доступа к "МойКласс"
     
@@ -51,10 +42,7 @@ config_utils.py
     
       MANAGERS_API_URL
       URL для получения менеджеров (волонтеров)
-    
-  
-
-
+      
 crm_service.py
 Содержит функции для работы с API "МойКласс":
 get_token_api()
@@ -170,3 +158,4 @@ main.js
 updateMetrics() - Обновляет метрики
 updateHistoryChart(period) - Обновляет график
 renderHistoryChart(history) - Отображает график
+
